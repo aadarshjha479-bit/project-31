@@ -27,6 +27,29 @@ const SUBJECT_COLORS = {
   English: '#d0d0d0'
 };
 
+const SYLLABUS = [
+  {
+    subject: 'Accountancy',
+    chapters: ['Partnership', 'Company Accounts', 'Issue of Shares', 'Final Accounts', 'Cash Flow']
+  },
+  {
+    subject: 'Business Studies',
+    chapters: ['Nature & Significance', 'Management', 'Business Environment', 'Planning', 'Organising', 'Staffing']
+  },
+  {
+    subject: 'Economics',
+    chapters: ['Development Experience', 'Indian Economy', 'Macro Concepts', 'National Income', 'Money & Banking']
+  },
+  {
+    subject: 'Informatics Practices',
+    chapters: ['Python Basics', 'Control Structures', 'Functions', 'Data Handling', 'Pandas', 'Matplotlib']
+  },
+  {
+    subject: 'SQL',
+    chapters: ['SELECT', 'WHERE', 'ORDER BY', 'GROUP BY', 'JOINS', 'LIMIT']
+  }
+];
+
 let state = null;
 
 function getDateString(date) {
@@ -52,11 +75,6 @@ function formatLongDate(date) {
   }).format(date);
 }
 
-function parseDateString(dateString) {
-  const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
 function buildTaskPlan() {
   const year = new Date().getFullYear();
   const startDate = new Date(year, 9, 5);
@@ -67,7 +85,6 @@ function buildTaskPlan() {
   while (current <= endDate) {
     const dateString = getDateString(current);
     const dayNumber = Math.floor((current - startDate) / (1000 * 60 * 60 * 24)) + 1;
-
     const baseTasks = [
       {
         subject: dayNumber % 2 === 0 ? 'Accountancy' : 'Economics',
@@ -126,27 +143,12 @@ function buildTaskPlan() {
       order: index + 1
     }));
 
-    plan.push({
-      date: dateString,
-      day: dayNumber,
-      tasks
-    });
-
+    plan.push({ date: dateString, day: dayNumber, tasks });
     current = new Date(current);
     current.setDate(current.getDate() + 1);
   }
 
   return plan;
-}
-
-function getPlan() {
-  const existing = localStorage.getItem(PLAN_KEY);
-  if (!existing) {
-    const plan = buildTaskPlan();
-    localStorage.setItem(PLAN_KEY, JSON.stringify(plan));
-    return plan;
-  }
-  return JSON.parse(existing);
 }
 
 function defaultState() {
@@ -159,13 +161,20 @@ function defaultState() {
   };
 }
 
+function getPlan() {
+  const existing = localStorage.getItem(PLAN_KEY);
+  if (!existing) {
+    const plan = buildTaskPlan();
+    localStorage.setItem(PLAN_KEY, JSON.stringify(plan));
+    return plan;
+  }
+  return JSON.parse(existing);
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return defaultState();
-    }
-
+    if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
     return {
       ...defaultState(),
@@ -203,21 +212,6 @@ function toggleTask(taskId, done) {
   renderAll();
 }
 
-function getDailySummary(dateString) {
-  const entry = getEntryByDate(dateString);
-  if (!entry) {
-    return { total: 0, done: 0, remaining: 0, complete: false, points: 0 };
-  }
-
-  const total = entry.tasks.length;
-  const done = entry.tasks.filter((task) => getTaskStatus(task.id)).length;
-  const remaining = total - done;
-  const complete = done === total;
-  const points = calculateDayPoints(entry);
-
-  return { total, done, remaining, complete, points };
-}
-
 function calculateDayPoints(entry) {
   if (!entry) return 0;
 
@@ -230,6 +224,19 @@ function calculateDayPoints(entry) {
   const bonus = entry.tasks.every((task) => getTaskStatus(task.id)) ? 25 : 0;
   const penalty = missed * 5;
   return earned + bonus - penalty;
+}
+
+function getDailySummary(dateString) {
+  const entry = getEntryByDate(dateString);
+  if (!entry) return { total: 0, done: 0, remaining: 0, complete: false, points: 0 };
+
+  const total = entry.tasks.length;
+  const done = entry.tasks.filter((task) => getTaskStatus(task.id)).length;
+  const remaining = total - done;
+  const complete = done === total;
+  const points = calculateDayPoints(entry);
+
+  return { total, done, remaining, complete, points };
 }
 
 function getOverallProgress() {
@@ -292,7 +299,6 @@ function updateQuoteSystem() {
 function renderDashboard() {
   const today = getTodayPlan();
   const summary = getDailySummary(today.date);
-  const overall = getOverallProgress();
   const dayNumber = getCurrentDayNumber();
   const daysRemaining = Math.max(0, 31 - dayNumber);
   const todayProgress = summary.total ? Math.round((summary.done / summary.total) * 100) : 0;
@@ -300,14 +306,13 @@ function renderDashboard() {
   document.getElementById('currentDateText').textContent = formatLongDate(new Date());
   document.getElementById('currentDayText').textContent = `${dayNumber} / 31`;
   document.getElementById('daysRemainingText').textContent = `${daysRemaining} days`;
-  document.getElementById('overallProgressText').textContent = `${overall}%`;
+  document.getElementById('overallProgressText').textContent = `${getOverallProgress()}%`;
   document.getElementById('todayProgressText').textContent = `${todayProgress}%`;
   document.getElementById('pointsText').textContent = `${getOverallPoints()}`;
   document.getElementById('streakText').textContent = `${getCurrentStreak()}`;
 
   const list = document.getElementById('dashboardMissionList');
   list.innerHTML = '';
-
   today.tasks.forEach((task) => {
     const item = document.createElement('li');
     item.className = `task-item ${getTaskStatus(task.id) ? 'done' : ''}`;
@@ -343,7 +348,6 @@ function renderMissionScreen() {
 
   const list = document.getElementById('missionTaskList');
   list.innerHTML = '';
-
   today.tasks.forEach((task) => {
     const item = document.createElement('li');
     item.className = `task-item ${getTaskStatus(task.id) ? 'done' : ''}`;
@@ -372,20 +376,14 @@ function renderProgressScreen() {
 
   plan.forEach((entry) => {
     entry.tasks.forEach((task) => {
-      if (!subjectMap[task.subject]) {
-        subjectMap[task.subject] = { total: 0, done: 0 };
-      }
-
+      if (!subjectMap[task.subject]) subjectMap[task.subject] = { total: 0, done: 0 };
       subjectMap[task.subject].total += 1;
-      if (getTaskStatus(task.id)) {
-        subjectMap[task.subject].done += 1;
-      }
+      if (getTaskStatus(task.id)) subjectMap[task.subject].done += 1;
     });
   });
 
   const list = document.getElementById('subjectProgressList');
   list.innerHTML = '';
-
   Object.entries(subjectMap).forEach(([subject, data]) => {
     const percent = data.total ? Math.round((data.done / data.total) * 100) : 0;
     const card = document.createElement('div');
@@ -400,6 +398,37 @@ function renderProgressScreen() {
       </div>
     `;
     list.appendChild(card);
+  });
+}
+
+function renderSyllabusScreen() {
+  const list = document.getElementById('syllabusList');
+  list.innerHTML = '';
+
+  SYLLABUS.forEach((group) => {
+    const subject = document.createElement('div');
+    subject.className = 'subject-card';
+
+    const completed = group.chapters.filter((chapter) => {
+      const taskMatch = getPlan().flatMap((entry) => entry.tasks).find((task) => task.subject === group.subject && task.chapter.includes(chapter));
+      return taskMatch ? getTaskStatus(taskMatch.id) : false;
+    }).length;
+
+    const percent = group.chapters.length ? Math.round((completed / group.chapters.length) * 100) : 0;
+
+    subject.innerHTML = `
+      <div class="subject-head">
+        <span>${group.subject}</span>
+        <span>${percent}%</span>
+      </div>
+      <div class="progress-bar">
+        <span style="width:${percent}%; background: linear-gradient(90deg, ${SUBJECT_COLORS[group.subject] || '#d55d5d'}, #ff4b4b);"></span>
+      </div>
+      <div class="subject-meta-list">
+        ${group.chapters.map((chapter) => `<div class="chapter-pill">${chapter}</div>`).join('')}
+      </div>
+    `;
+    list.appendChild(subject);
   });
 }
 
@@ -442,15 +471,16 @@ function renderCalendarScreen() {
       else cell.classList.add('failed');
     }
 
+    const summary = entry ? getDailySummary(dateString) : null;
     cell.innerHTML = `
       <span class="calendar-date">${day}</span>
-      <span class="calendar-status">${entry ? (getDailySummary(dateString).complete ? 'done' : 'open') : ''}</span>
+      <span class="calendar-status">${entry ? (summary.complete ? 'done' : 'open') : ''}</span>
     `;
 
     if (entry) {
       cell.addEventListener('click', () => {
-        const summary = getDailySummary(dateString);
-        alert(`${formatDate(date)}\n${summary.done}/${summary.total} tasks complete\nPoints: ${summary.points}`);
+        const s = getDailySummary(dateString);
+        alert(`${formatDate(date)}\n${s.done}/${s.total} tasks complete\nPoints: ${s.points}`);
       });
     }
 
@@ -479,6 +509,7 @@ function renderAll() {
   renderDashboard();
   renderMissionScreen();
   renderProgressScreen();
+  renderSyllabusScreen();
   renderCalendarScreen();
   renderQuoteHistory();
   renderVersion();
@@ -488,20 +519,13 @@ function setActiveScreen(screenName) {
   document.querySelectorAll('.screen').forEach((screen) => {
     screen.classList.toggle('active', screen.id === `screen-${screenName}`);
   });
-
   document.querySelectorAll('.nav-btn').forEach((button) => {
     button.classList.toggle('active', button.dataset.screen === screenName);
   });
 }
 
 function exportData() {
-  const payload = JSON.stringify({
-    version: APP_VERSION,
-    exportedAt: new Date().toISOString(),
-    state,
-    plan: getPlan()
-  }, null, 2);
-
+  const payload = JSON.stringify({ version: APP_VERSION, exportedAt: new Date().toISOString(), state, plan: getPlan() }, null, 2);
   const blob = new Blob([payload], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -515,7 +539,6 @@ function exportData() {
 
 function importData(file) {
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = (event) => {
     try {
@@ -543,7 +566,6 @@ function resetTodayProgress() {
 function resetProject31() {
   const confirmed = window.confirm('Reset Project 31? This will clear all progress and quotes.');
   if (!confirmed) return;
-
   state = defaultState();
   localStorage.removeItem(PLAN_KEY);
   localStorage.removeItem(STORAGE_KEY);
@@ -622,10 +644,7 @@ function bindEvents() {
 
 function init() {
   state = loadState();
-  if (!state.quoteHistory || !state.quoteHistory.length) {
-    updateQuoteSystem();
-  }
-
+  updateQuoteSystem();
   setActiveScreen('dashboard');
   renderAll();
   bindEvents();
