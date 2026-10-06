@@ -1,0 +1,24 @@
+{
+  "name": "Project 31",
+  "short_name": "P31",
+  "description": "Project 31 — 31 Days. Zero excuses. Execute.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090a0d",
+  "theme_color": "#0d0d0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
