@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0d0f" />
+    <meta name="description" content="Project 31 — 31 days. Zero excuses. Execute." />
+    <title>Project 31</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icon-192.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar glass">
+        <div class="brand-wrap">
+          <div class="brand-mark">31</div>
+          <div>
+            <div class="brand-name">PROJECT 31</div>
+            <div class="brand-sub">EXECUTE.</div>
+          </div>
+        </div>
+        <button id="updateBtn" class="update-btn hidden" type="button">Update available</button>
+      </header>
+
+      <main class="main-area">
+        <section id="screen-dashboard" class="screen active">
+          <div class="hero card glass">
+            <p class="eyebrow">Mission Control</p>
+            <h1>PROJECT 31</h1>
+            <p class="tagline">31 DAYS. ZERO EXCUSES. EXECUTE.</p>
+
+            <div class="hero-meta">
+              <div>
+                <span class="meta-label">Date</span>
+                <strong id="currentDateText">--</strong>
+              </div>
+              <div>
+                <span class="meta-label">Day</span>
+                <strong id="currentDayText">--</strong>
+              </div>
+              <div>
+                <span class="meta-label">Remaining</span>
+                <strong id="daysRemainingText">--</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card card glass">
+              <span>Overall</span>
+              <strong id="overallProgressText">0%</strong>
+            </div>
+            <div class="stat-card card glass">
+              <span>Today</span>
+              <strong id="todayProgressText">0%</strong>
+            </div>
+            <div class="stat-card card glass">
+              <span>Points</span>
+              <strong id="pointsText">0</strong>
+            </div>
+            <div class="stat-card card glass">
+              <span>Streak</span>
+              <strong id="streakText">0</strong>
+            </div>
+          </div>
+
+          <div class="card glass quote-card">
+            <div class="card-header">
+              <span class="tiny-label">Quote</span>
+            </div>
+            <p id="quoteText">"Discipline is the difference between regret and result."</p>
+          </div>
+
+          <div class="card glass mission-card">
+            <div class="card-header split">
+              <span class="tiny-label">Today's mission</span>
+              <span id="missionStatusBadge" class="status-badge">Incomplete</span>
+            </div>
+            <ul id="dashboardMissionList" class="task-list compact"></ul>
+          </div>
+        </section>
+
+        <section id="screen-mission" class="screen">
+          <div class="section-head card glass">
+            <div>
+              <p class="eyebrow">Daily Mission</p>
+              <h2 id="missionTitle">DAY 1</h2>
+            </div>
+            <span id="missionCountText" class="tiny-label">0/0 complete</span>
+          </div>
+
+          <div class="card glass mission-detail-wrap">
+            <ul id="missionTaskList" class="task-list large"></ul>
+          </div>
+        </section>
+
+        <section id="screen-progress" class="screen">
+          <div class="section-head card glass">
+            <div>
+              <p class="eyebrow">Progress</p>
+              <h2>Execution Report</h2>
+            </div>
+          </div>
+          <div id="subjectProgressList" class="subject-progress-list"></div>
+        </section>
+
+        <section id="screen-history" class="screen">
+          <div class="section-head card glass">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2>Calendar</h2>
+            </div>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </section>
+
+        <section id="screen-quotes" class="screen">
+          <div class="section-head card glass">
+            <div>
+              <p class="eyebrow">Quotes</p>
+              <h2>Discipline log</h2>
+            </div>
+          </div>
+          <div id="quoteHistoryList" class="quotes-list"></div>
+        </section>
+
+        <section id="screen-settings" class="screen">
+          <div class="section-head card glass">
+            <div>
+              <p class="eyebrow">Settings</p>
+              <h2>Control Panel</h2>
+            </div>
+          </div>
+
+          <div class="settings-list card glass">
+            <button data-action="update" type="button" class="action-btn primary">Update app</button>
+            <button data-action="export" type="button" class="action-btn">Export data</button>
+            <button data-action="import" type="button" class="action-btn">Import data</button>
+            <button data-action="reset-today" type="button" class="action-btn warning">Reset today</button>
+            <button data-action="reset-all" type="button" class="action-btn danger">Reset Project 31</button>
+            <div class="app-version">Version: <span id="appVersionText">1.0.0</span></div>
+          </div>
+
+          <input id="importFileInput" type="file" accept="application/json" hidden />
+        </section>
+      </main>
+
+      <nav class="bottom-nav glass" aria-label="Main navigation">
+        <button class="nav-btn active" data-screen="dashboard" type="button">Home</button>
+        <button class="nav-btn" data-screen="mission" type="button">Mission</button>
+        <button class="nav-btn" data-screen="progress" type="button">Progress</button>
+        <button class="nav-btn" data-screen="history" type="button">History</button>
+        <button class="nav-btn" data-screen="settings" type="button">Settings</button>
+      </nav>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
